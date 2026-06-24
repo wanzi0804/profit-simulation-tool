@@ -178,7 +178,7 @@ button:hover {
 
 table {
   width: 100%;
-  min-width: 3260px;
+  min-width: 3220px;
   border-collapse: collapse;
   table-layout: fixed;
 }
@@ -260,7 +260,7 @@ th:nth-child(8),
 td:nth-child(8),
 th:nth-child(10),
 td:nth-child(10) {
-  width: 150px;
+  width: 168px;
 }
 
 th:nth-child(9),
@@ -268,27 +268,36 @@ td:nth-child(9),
 th:nth-child(11),
 td:nth-child(11),
 th:nth-child(12),
-td:nth-child(12),
+td:nth-child(12) {
+  width: 124px;
+}
+
 th:nth-child(13),
 td:nth-child(13),
 th:nth-child(14),
 td:nth-child(14) {
-  width: 142px;
+  width: 172px;
 }
 
 th:nth-child(15),
 td:nth-child(15),
 th:nth-child(16),
-td:nth-child(16),
+td:nth-child(16) {
+  width: 142px;
+}
+
 th:nth-child(17),
 td:nth-child(17),
+th:nth-child(19),
+td:nth-child(19) {
+  width: 112px;
+}
+
 th:nth-child(18),
 td:nth-child(18),
-th:nth-child(19),
-td:nth-child(19),
 th:nth-child(20),
 td:nth-child(20) {
-  width: 160px;
+  width: 138px;
 }
 
 th:last-child,
