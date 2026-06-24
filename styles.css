@@ -176,6 +176,19 @@ button:hover {
   overflow-x: auto;
 }
 
+.table-footer-actions {
+  display: flex;
+  justify-content: flex-start;
+  padding: 8px 10px 10px;
+  border-top: 1px solid var(--line);
+  background: #f8fafc;
+}
+
+.table-footer-actions button {
+  min-height: 38px;
+  padding: 5px 12px;
+}
+
 table {
   width: 100%;
   min-width: 3340px;
@@ -489,6 +502,10 @@ body.capture-mode .settings-grid .label-sub {
 
 body.capture-mode .table-wrap {
   overflow-x: hidden;
+}
+
+body.capture-mode .table-footer-actions {
+  padding: 5px 6px 6px;
 }
 
 body.capture-mode table {

@@ -53,6 +53,7 @@ const categoryLabels = {
 const tbody = document.querySelector("#productRows");
 const template = document.querySelector("#rowTemplate");
 const addRowBtn = document.querySelector("#addRowBtn");
+const addRowBottomBtn = document.querySelector("#addRowBottomBtn");
 const captureModeBtn = document.querySelector("#captureModeBtn");
 const exportBtn = document.querySelector("#exportBtn");
 const exportExcelBtn = document.querySelector("#exportExcelBtn");
@@ -644,6 +645,7 @@ tbody.addEventListener("click", (event) => {
 });
 settingInputs.forEach((input) => input.addEventListener("input", recalculate));
 addRowBtn.addEventListener("click", () => addRow({ category: "cosmetics" }));
+addRowBottomBtn.addEventListener("click", () => addRow({ category: "cosmetics" }));
 captureModeBtn.addEventListener("click", () => {
   setCaptureMode(!document.body.classList.contains("capture-mode"));
 });
