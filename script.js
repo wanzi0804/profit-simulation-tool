@@ -55,6 +55,9 @@ const template = document.querySelector("#rowTemplate");
 const addRowBtn = document.querySelector("#addRowBtn");
 const addRowBottomBtn = document.querySelector("#addRowBottomBtn");
 const captureModeBtn = document.querySelector("#captureModeBtn");
+const saveRecordBtn = document.querySelector("#saveRecordBtn");
+const importRecordBtn = document.querySelector("#importRecordBtn");
+const recordFileInput = document.querySelector("#recordFileInput");
 const exportBtn = document.querySelector("#exportBtn");
 const exportExcelBtn = document.querySelector("#exportExcelBtn");
 const settingInputs = [
@@ -91,6 +94,20 @@ function settings() {
       numberValue(document.querySelector("#taobaoPlatformRate")) / 100,
     sellerRate: numberValue(document.querySelector("#sellerRate")) / 100,
   };
+}
+
+function setSettings(config = {}) {
+  const mapping = {
+    exchangeRate: "#exchangeRate",
+    krLogistics: "#krLogistics",
+    freeShippingBase: "#freeShippingBase",
+    taobaoPlatformRate: "#taobaoPlatformRate",
+    sellerRate: "#sellerRate",
+  };
+  Object.entries(mapping).forEach(([key, selector]) => {
+    if (config[key] === undefined || config[key] === null) return;
+    document.querySelector(selector).value = config[key];
+  });
 }
 
 function rateKind(category, unitAmount) {
@@ -325,6 +342,62 @@ function addRow(data = {}) {
   });
   tbody.appendChild(fragment);
   recalculate();
+}
+
+function currentRecord() {
+  return {
+    version: 1,
+    savedAt: new Date().toISOString(),
+    settings: Object.fromEntries(
+      settingInputs.map((input) => [input.id, numberValue(input)]),
+    ),
+    rows: [...tbody.querySelectorAll("tr")].map(rowData),
+  };
+}
+
+function recordFilename() {
+  const stamp = new Date()
+    .toISOString()
+    .slice(0, 19)
+    .replace("T", "-")
+    .replaceAll(":", "");
+  return `profit-record-${stamp}.json`;
+}
+
+function saveRecord() {
+  const blob = new Blob([JSON.stringify(currentRecord(), null, 2)], {
+    type: "application/json;charset=utf-8",
+  });
+  downloadBlob(blob, recordFilename());
+}
+
+function importRecordPayload(payload) {
+  if (!payload || typeof payload !== "object" || !Array.isArray(payload.rows)) {
+    throw new Error("记录文件格式不正确");
+  }
+  setSettings(payload.settings || {});
+  tbody.innerHTML = "";
+  const rows = payload.rows.length ? payload.rows : [{ category: "cosmetics" }];
+  rows.forEach((row) => addRow({ category: "cosmetics", ...row }));
+  recalculate();
+}
+
+function importRecordFile(file) {
+  const reader = new FileReader();
+  reader.addEventListener("load", () => {
+    try {
+      importRecordPayload(JSON.parse(reader.result));
+    } catch (error) {
+      alert(error.message || "导入失败");
+    } finally {
+      recordFileInput.value = "";
+    }
+  });
+  reader.addEventListener("error", () => {
+    alert("无法读取记录文件");
+    recordFileInput.value = "";
+  });
+  reader.readAsText(file, "utf-8");
 }
 
 async function extractProduct(row) {
@@ -675,6 +748,12 @@ addRowBtn.addEventListener("click", () => addRow({ category: "cosmetics" }));
 addRowBottomBtn.addEventListener("click", () => addRow({ category: "cosmetics" }));
 captureModeBtn.addEventListener("click", () => {
   setCaptureMode(!document.body.classList.contains("capture-mode"));
+});
+saveRecordBtn.addEventListener("click", saveRecord);
+importRecordBtn.addEventListener("click", () => recordFileInput.click());
+recordFileInput.addEventListener("change", () => {
+  const [file] = recordFileInput.files || [];
+  if (file) importRecordFile(file);
 });
 exportBtn.addEventListener("click", exportCsv);
 exportExcelBtn.addEventListener("click", exportExcel);
