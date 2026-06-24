@@ -1,18 +1,4 @@
-const defaultRows = [
-  {
-    productUrl: "https://brand.naver.com/shop-pleuvoir/products/11150832330",
-    imageUrl:
-      "https://shop-phinf.pstatic.net/20260529_248/178003191168544TGL_JPEG/57554588533323005_151313993.jpg?type=o1000",
-    category: "cosmetics",
-    capacity: 300,
-    chineseName: "Pleuvoir 花香麝香洗手液 300mL",
-    name: "플르부아 플로럴 머스크 핸드워시 300mL",
-    krwRetail: 28000,
-    krwSupply: 12900,
-    taobaoPrice: 248,
-    taobaoLowPrice: 228,
-  },
-];
+const defaultRows = [{ category: "cosmetics" }];
 
 const fields = [
   "productUrl",
