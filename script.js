@@ -389,20 +389,25 @@ function currentRecord() {
   };
 }
 
-function recordFilename() {
-  const stamp = new Date()
-    .toISOString()
-    .slice(0, 19)
-    .replace("T", "-")
-    .replaceAll(":", "");
-  return `profit-record-${stamp}.json`;
+function requestedFilename(extension) {
+  const input = prompt("请输入保存文件名 / 저장할 파일명을 입력하세요", "");
+  if (input === null) return null;
+  const safeName = input.trim().replace(/[\\/:*?"<>|]+/g, "-");
+  if (!safeName) {
+    alert("请输入文件名 / 파일명을 입력하세요");
+    return null;
+  }
+  const suffix = `.${extension}`;
+  return safeName.toLowerCase().endsWith(suffix) ? safeName : `${safeName}${suffix}`;
 }
 
 function saveRecord() {
+  const filename = requestedFilename("json");
+  if (!filename) return;
   const blob = new Blob([JSON.stringify(currentRecord(), null, 2)], {
     type: "application/json;charset=utf-8",
   });
-  downloadBlob(blob, recordFilename());
+  downloadBlob(blob, filename);
 }
 
 function importRecordPayload(payload) {
@@ -546,11 +551,13 @@ function csvEscape(value) {
 }
 
 function exportCsv() {
+  const filename = requestedFilename("csv");
+  if (!filename) return;
   const lines = exportRows().map((row) => row.map(csvEscape).join(","));
   const blob = new Blob(["\ufeff", lines.join("\n")], {
     type: "text/csv;charset=utf-8",
   });
-  downloadBlob(blob, "profit-simulation.csv");
+  downloadBlob(blob, filename);
 }
 
 function escapeXml(value) {
@@ -757,6 +764,8 @@ function createZip(files) {
 }
 
 function exportExcel() {
+  const filename = requestedFilename("xlsx");
+  if (!filename) return;
   const rows = excelRows();
   const files = [
     {
@@ -805,7 +814,7 @@ function exportExcel() {
   const blob = new Blob([createZip(files)], {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
-  downloadBlob(blob, "profit-simulation.xlsx");
+  downloadBlob(blob, filename);
 }
 
 function downloadBlob(blob, filename) {
