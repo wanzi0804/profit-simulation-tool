@@ -53,6 +53,7 @@ const categoryLabels = {
 const tbody = document.querySelector("#productRows");
 const template = document.querySelector("#rowTemplate");
 const addRowBtn = document.querySelector("#addRowBtn");
+const captureModeBtn = document.querySelector("#captureModeBtn");
 const exportBtn = document.querySelector("#exportBtn");
 const exportExcelBtn = document.querySelector("#exportExcelBtn");
 const settingInputs = [
@@ -616,6 +617,17 @@ function downloadBlob(blob, filename) {
   URL.revokeObjectURL(url);
 }
 
+function setCaptureMode(enabled) {
+  document.body.classList.toggle("capture-mode", enabled);
+  captureModeBtn.setAttribute("aria-pressed", String(enabled));
+  captureModeBtn.querySelector(".button-main").textContent = enabled
+    ? "退出截图"
+    : "截图模式";
+  captureModeBtn.querySelector(".button-sub").textContent = enabled
+    ? "캡처 종료"
+    : "캡처 모드";
+}
+
 tbody.addEventListener("input", recalculate);
 tbody.addEventListener("change", recalculate);
 tbody.addEventListener("click", (event) => {
@@ -632,6 +644,9 @@ tbody.addEventListener("click", (event) => {
 });
 settingInputs.forEach((input) => input.addEventListener("input", recalculate));
 addRowBtn.addEventListener("click", () => addRow({ category: "cosmetics" }));
+captureModeBtn.addEventListener("click", () => {
+  setCaptureMode(!document.body.classList.contains("capture-mode"));
+});
 exportBtn.addEventListener("click", exportCsv);
 exportExcelBtn.addEventListener("click", exportExcel);
 defaultRows.forEach(addRow);
