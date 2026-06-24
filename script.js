@@ -14,7 +14,6 @@ const fields = [
 ];
 
 const exportHeaders = {
-  productUrl: "官网链接",
   imageUrl: "产品图",
   category: "品类",
   capacity: "容量",
@@ -35,6 +34,7 @@ const exportHeaders = {
   normalTax: "原价税金(CNY)",
   discountTaxRate: "最低价税率",
   discountTax: "最低价税金(CNY)",
+  productUrl: "官网链接",
 };
 
 const percentKeys = new Set([
@@ -43,6 +43,17 @@ const percentKeys = new Set([
   "discountProfitRate",
   "normalTaxRate",
   "discountTaxRate",
+]);
+const integerKeys = new Set(["capacity", "krwRetail", "krwSupply"]);
+const cnyKeys = new Set([
+  "cnyRetail",
+  "cnySupply",
+  "taobaoPrice",
+  "taobaoLowPrice",
+  "normalProfit",
+  "discountProfit",
+  "normalTax",
+  "discountTax",
 ]);
 const categoryLabels = {
   cosmetics: "化妆品",
@@ -78,6 +89,29 @@ function money(value) {
 
 function percent(value) {
   return `${((Number.isFinite(value) ? value : 0) * 100).toFixed(1)}%`;
+}
+
+function roundedNumber(value) {
+  return new Intl.NumberFormat("zh-CN", {
+    maximumFractionDigits: 0,
+    minimumFractionDigits: 0,
+  }).format(Number.isFinite(value) ? value : 0);
+}
+
+function roundedMoney(value) {
+  return new Intl.NumberFormat("zh-CN", {
+    style: "currency",
+    currency: "CNY",
+    maximumFractionDigits: 0,
+    minimumFractionDigits: 0,
+  }).format(Number.isFinite(value) ? value : 0);
+}
+
+function exportDisplayValue(key, value) {
+  if (percentKeys.has(key)) return percent(value);
+  if (cnyKeys.has(key)) return roundedMoney(value);
+  if (integerKeys.has(key)) return roundedNumber(value);
+  return value;
 }
 
 function numberValue(element) {
@@ -451,8 +485,7 @@ function exportRows() {
     rows.push(
       keys.map((key) => {
         const value = data[key];
-        if (percentKeys.has(key)) return percent(value);
-        return value;
+        return exportDisplayValue(key, value);
       }),
     );
   });
@@ -463,6 +496,11 @@ function formulaCell(formula, value = 0) {
   return { formula, value };
 }
 
+function excelImageCell(url) {
+  const imageUrl = String(url || "").replaceAll('"', '""');
+  return imageUrl ? formulaCell(`IMAGE("${imageUrl}")`, "") : "";
+}
+
 function excelRows() {
   const keys = Object.keys(exportHeaders);
   const rows = [[...keys.map((key) => exportHeaders[key])]];
@@ -471,31 +509,31 @@ function excelRows() {
   tbody.querySelectorAll("tr").forEach((row, index) => {
     const data = calculate(row);
     const r = index + 2;
-    const normalTaxRateFormula = `IF(C${r}="化妆品",IF(L${r}/D${r}<10,9.1%,23.05%),IF(C${r}="面膜",IF(L${r}/D${r}<15,9.1%,23.05%),9.1%))`;
-    const discountTaxRateFormula = `IF(C${r}="化妆品",IF(M${r}/D${r}<10,9.1%,23.05%),IF(C${r}="面膜",IF(M${r}/D${r}<15,9.1%,23.05%),9.1%))`;
+    const normalTaxRateFormula = `IF(B${r}="化妆品",IF(K${r}/C${r}<10,9.1%,23.05%),IF(B${r}="面膜",IF(K${r}/C${r}<15,9.1%,23.05%),9.1%))`;
+    const discountTaxRateFormula = `IF(B${r}="化妆品",IF(L${r}/C${r}<10,9.1%,23.05%),IF(B${r}="面膜",IF(L${r}/C${r}<15,9.1%,23.05%),9.1%))`;
 
     rows.push([
-      data.productUrl,
-      data.imageUrl,
+      excelImageCell(data.imageUrl),
       data.category,
       data.capacity,
       data.chineseName,
       data.name,
       data.krwRetail,
-      formulaCell(`G${r}/${config.exchangeRate}`, data.cnyRetail),
+      formulaCell(`F${r}/${config.exchangeRate}`, data.cnyRetail),
       data.krwSupply,
-      formulaCell(`I${r}/${config.exchangeRate}`, data.cnySupply),
-      formulaCell(`IF(G${r}>0,I${r}/G${r},0)`, data.supplyRate),
+      formulaCell(`H${r}/${config.exchangeRate}`, data.cnySupply),
+      formulaCell(`IF(F${r}>0,H${r}/F${r},0)`, data.supplyRate),
       data.taobaoPrice,
       data.taobaoLowPrice,
-      formulaCell(`L${r}-J${r}-L${r}*${config.taobaoPlatformRate}-L${r}*${config.sellerRate}-MIN(${config.krLogistics},${config.krLogistics}*L${r}/${config.freeShippingBase})-S${r}`, data.normalProfit),
-      formulaCell(`IF(L${r}>0,N${r}/L${r},0)`, data.normalProfitRate),
-      formulaCell(`M${r}-J${r}-M${r}*${config.taobaoPlatformRate}-M${r}*${config.sellerRate}-MIN(${config.krLogistics},${config.krLogistics}*M${r}/${config.freeShippingBase})-U${r}`, data.discountProfit),
-      formulaCell(`IF(M${r}>0,P${r}/M${r},0)`, data.discountProfitRate),
+      formulaCell(`K${r}-I${r}-K${r}*${config.taobaoPlatformRate}-K${r}*${config.sellerRate}-MIN(${config.krLogistics},${config.krLogistics}*K${r}/${config.freeShippingBase})-R${r}`, data.normalProfit),
+      formulaCell(`IF(K${r}>0,M${r}/K${r},0)`, data.normalProfitRate),
+      formulaCell(`L${r}-I${r}-L${r}*${config.taobaoPlatformRate}-L${r}*${config.sellerRate}-MIN(${config.krLogistics},${config.krLogistics}*L${r}/${config.freeShippingBase})-T${r}`, data.discountProfit),
+      formulaCell(`IF(L${r}>0,O${r}/L${r},0)`, data.discountProfitRate),
       formulaCell(normalTaxRateFormula, data.normalTaxRate),
-      formulaCell(`L${r}*R${r}`, data.normalTax),
+      formulaCell(`K${r}*Q${r}`, data.normalTax),
       formulaCell(discountTaxRateFormula, data.discountTaxRate),
-      formulaCell(`M${r}*T${r}`, data.discountTax),
+      formulaCell(`L${r}*S${r}`, data.discountTax),
+      data.productUrl,
     ]);
   });
 
@@ -534,30 +572,84 @@ function columnName(index) {
   return name;
 }
 
+function styleIdForKey(key, isHeader) {
+  if (isHeader) return 1;
+  if (percentKeys.has(key)) return 4;
+  if (cnyKeys.has(key)) return 3;
+  if (integerKeys.has(key)) return 2;
+  return 0;
+}
+
+function cellStyleAttribute(key, isHeader) {
+  const styleId = styleIdForKey(key, isHeader);
+  return styleId ? ` s="${styleId}"` : "";
+}
+
 function worksheetXml(rows) {
+  const keys = Object.keys(exportHeaders);
   const sheetRows = rows
     .map((row, rowIndex) => {
+      const isHeader = rowIndex === 0;
       const cells = row
         .map((value, colIndex) => {
           const ref = `${columnName(colIndex)}${rowIndex + 1}`;
+          const style = cellStyleAttribute(keys[colIndex], isHeader);
           if (value && typeof value === "object" && "formula" in value) {
             const cached = Number.isFinite(value.value) ? value.value : 0;
-            return `<c r="${ref}"><f>${escapeXml(value.formula)}</f><v>${cached}</v></c>`;
+            return `<c r="${ref}"${style}><f>${escapeXml(value.formula)}</f><v>${cached}</v></c>`;
           }
           if (typeof value === "number" && Number.isFinite(value)) {
-            return `<c r="${ref}"><v>${value}</v></c>`;
+            return `<c r="${ref}"${style}><v>${value}</v></c>`;
           }
-          return `<c r="${ref}" t="inlineStr"><is><t>${escapeXml(value)}</t></is></c>`;
+          return `<c r="${ref}" t="inlineStr"${style}><is><t>${escapeXml(value)}</t></is></c>`;
         })
         .join("");
-      return `<row r="${rowIndex + 1}">${cells}</row>`;
+      const rowAttrs = rowIndex > 0 ? ` r="${rowIndex + 1}" ht="58" customHeight="1"` : ` r="${rowIndex + 1}"`;
+      return `<row${rowAttrs}>${cells}</row>`;
     })
     .join("");
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
   <sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>
+  <cols>
+    <col min="1" max="1" width="14" customWidth="1"/>
+    <col min="2" max="2" width="12" customWidth="1"/>
+    <col min="3" max="3" width="10" customWidth="1"/>
+    <col min="4" max="5" width="24" customWidth="1"/>
+    <col min="6" max="20" width="14" customWidth="1"/>
+    <col min="21" max="21" width="38" customWidth="1"/>
+  </cols>
   <sheetData>${sheetRows}</sheetData>
 </worksheet>`;
+}
+
+function stylesXml() {
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <numFmts count="3">
+    <numFmt numFmtId="164" formatCode="#,##0"/>
+    <numFmt numFmtId="165" formatCode="¥#,##0"/>
+    <numFmt numFmtId="166" formatCode="0.0%"/>
+  </numFmts>
+  <fonts count="2">
+    <font><sz val="11"/><name val="Calibri"/></font>
+    <font><b/><sz val="11"/><name val="Calibri"/></font>
+  </fonts>
+  <fills count="2">
+    <fill><patternFill patternType="none"/></fill>
+    <fill><patternFill patternType="gray125"/></fill>
+  </fills>
+  <borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>
+  <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+  <cellXfs count="5">
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
+    <xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/>
+    <xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>
+    <xf numFmtId="165" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>
+    <xf numFmtId="166" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>
+  </cellXfs>
+  <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
+</styleSheet>`;
 }
 
 const crcTable = (() => {
@@ -674,6 +766,7 @@ function exportExcel() {
   <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
   <Default Extension="xml" ContentType="application/xml"/>
   <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+  <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
   <Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
 </Types>`,
     },
@@ -689,6 +782,7 @@ function exportExcel() {
       data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
   <sheets><sheet name="Profit" sheetId="1" r:id="rId1"/></sheets>
+  <calcPr calcMode="auto" fullCalcOnLoad="1" forceFullCalc="1"/>
 </workbook>`,
     },
     {
@@ -696,7 +790,12 @@ function exportExcel() {
       data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
   <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
 </Relationships>`,
+    },
+    {
+      name: "xl/styles.xml",
+      data: stylesXml(),
     },
     {
       name: "xl/worksheets/sheet1.xml",
