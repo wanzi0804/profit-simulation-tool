@@ -71,6 +71,27 @@ function findCapacity(text) {
   return match ? Number(match[1]) : 0;
 }
 
+function detectEncoding(bytes, contentType = "") {
+  const headerCharset = String(contentType).match(/charset=([^;\s]+)/i)?.[1];
+  const head = new TextDecoder("latin1").decode(bytes.slice(0, 12000));
+  const metaCharset =
+    head.match(/<meta[^>]+charset=["']?\s*([^"'\s/>]+)/i)?.[1] ||
+    head.match(/<meta[^>]+content=["'][^"']*charset=([^"'\s;]+)/i)?.[1];
+  return String(headerCharset || metaCharset || "utf-8")
+    .trim()
+    .toLowerCase()
+    .replace(/^ks_c_5601-1987$/, "euc-kr")
+    .replace(/^x-windows-949$/, "windows-949");
+}
+
+function decodeHtml(bytes, contentType = "") {
+  try {
+    return new TextDecoder(detectEncoding(bytes, contentType)).decode(bytes);
+  } catch {
+    return new TextDecoder("utf-8").decode(bytes);
+  }
+}
+
 function translateProductName(name) {
   let text = String(name || "");
   const replacements = [
@@ -86,6 +107,10 @@ function translateProductName(name) {
     ["아이 크림", "眼霜"],
     ["로션", "乳液"],
     ["앰플", "安瓶"],
+    ["차가", "桦褐孔菌"],
+    ["에너지", "能量"],
+    ["부스터", "焕活"],
+    ["토너", "爽肤水"],
     ["향", ""],
   ];
   replacements.forEach(([from, to]) => {
@@ -135,6 +160,11 @@ function parseStructuredData(html) {
       if (!result.name && item.name) result.name = cleanText(item.name);
       if (!result.price) result.price = numericPrice(offer.price || offer.lowPrice || offer.highPrice);
       if (!result.imageUrl && image) result.imageUrl = String(image);
+      if (!result.capacity) {
+        result.capacity = findCapacity(
+          [item.mpn, item.sku, item.description, item.name].filter(Boolean).join(" "),
+        );
+      }
     });
   }
 
@@ -187,7 +217,7 @@ function parseProduct(html, sourceUrl) {
       /<meta[^>]+property=["']kakao:commerce:product_image_url["'][^>]+content=["']([^"']+)["']/i,
     ]);
   const price = structured.price || numericPrice(priceText);
-  const capacity = findCapacity(`${name} ${cleanText(html.slice(0, 120000))}`);
+  const capacity = structured.capacity || findCapacity(`${name} ${cleanText(html.slice(0, 120000))}`);
   return { name, chineseName: translateProductName(name), imageUrl, price, capacity };
 }
 
@@ -209,7 +239,8 @@ async function fetchHtml(url) {
   if (!response.ok) {
     throw new Error(`Site returned ${response.status}`);
   }
-  return response.text();
+  const bytes = new Uint8Array(await response.arrayBuffer());
+  return decodeHtml(bytes, response.headers.get("content-type") || "");
 }
 
 async function handleExtract(req, res) {
