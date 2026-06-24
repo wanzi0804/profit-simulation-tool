@@ -261,14 +261,15 @@ button:active {
 table {
   width: 100%;
   min-width: 3340px;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   table-layout: fixed;
 }
 
 th,
 td {
-  border-bottom: 1px solid var(--line);
-  padding: 11px 8px;
+  border-bottom: 1px solid #e3eaf2;
+  padding: 13px 8px;
   text-align: right;
   vertical-align: middle;
 }
@@ -277,14 +278,14 @@ th {
   position: sticky;
   top: 0;
   z-index: 1;
-  background: linear-gradient(180deg, #f1f6fb, #e9f0f7);
-  height: 70px;
-  color: #1f3652;
+  background: #eef5fb;
+  height: 66px;
+  color: #213852;
   font-size: 13px;
   font-weight: 750;
   line-height: 1.2;
   vertical-align: middle;
-  box-shadow: inset 0 -1px 0 var(--line-strong);
+  box-shadow: inset 0 -1px 0 #d5e0ec;
 }
 
 th .label-main {
@@ -308,61 +309,20 @@ tbody tr {
   transition: background 0.14s ease;
 }
 
+tbody td {
+  background: #ffffff;
+}
+
 tbody tr:nth-child(even) {
-  background: #fbfdff;
+  background: #ffffff;
 }
 
 tbody tr:hover {
-  background: #f3f8fb;
+  background: #f8fbff;
 }
 
 tbody tr:hover td {
-  border-bottom-color: #c9d7e6;
-}
-
-th:nth-child(1),
-td:nth-child(1),
-th:nth-child(2),
-td:nth-child(2),
-th:nth-child(3),
-td:nth-child(3),
-th:nth-child(4),
-td:nth-child(4),
-th:nth-child(5),
-td:nth-child(5),
-th:nth-child(6),
-td:nth-child(6),
-th:nth-child(7),
-td:nth-child(7),
-th:nth-child(8),
-td:nth-child(8) {
-  border-right-color: #d9e3ee;
-}
-
-th:nth-child(9),
-td:nth-child(9),
-th:nth-child(11),
-td:nth-child(11),
-th:nth-child(14),
-td:nth-child(14),
-th:nth-child(16),
-td:nth-child(16),
-th:nth-child(18),
-td:nth-child(18),
-th:nth-child(20),
-td:nth-child(20),
-th:nth-child(22),
-td:nth-child(22) {
-  border-left: 1px solid #cfdbe8;
-}
-
-th:nth-child(n + 16),
-td:nth-child(n + 16) {
-  background-image: linear-gradient(rgba(236, 253, 245, 0.34), rgba(236, 253, 245, 0.34));
-}
-
-tbody tr:hover td:nth-child(n + 16) {
-  background-image: linear-gradient(rgba(220, 252, 231, 0.5), rgba(220, 252, 231, 0.5));
+  border-bottom-color: #d5e0ec;
 }
 
 th:nth-child(1),
@@ -498,7 +458,7 @@ select,
 textarea {
   width: 100%;
   min-height: 36px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #cbd8e6;
   border-radius: 6px;
   padding: 8px 9px;
   color: var(--ink);
@@ -545,13 +505,13 @@ textarea:focus {
 
 input[placeholder*="手动输入"],
 input[placeholder*="직접 입력"] {
-  background: #fffdf7;
-  border-color: #dccb9c;
+  background: #fffefa;
+  border-color: #d9cfae;
 }
 
 input[placeholder*="自动"],
 textarea[placeholder*="自动"] {
-  background: #f9fbfd;
+  background: #fbfdff;
 }
 
 .extract-button {
