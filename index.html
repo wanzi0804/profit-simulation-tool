@@ -68,6 +68,7 @@
           <table>
             <thead>
               <tr>
+                <th></th>
                 <th><span class="label-main">官网链接</span><span class="label-sub">공식몰 링크</span></th>
                 <th><span class="label-main">提取</span><span class="label-sub">추출</span></th>
                 <th><span class="label-main">产品图</span><span class="label-sub">상품 이미지</span></th>
@@ -83,12 +84,13 @@
                 <th><span class="label-main">淘宝原价(CNY)</span><span class="label-sub">타오바오 정가(CNY)</span></th>
                 <th><span class="label-main">淘宝最低价(CNY)</span><span class="label-sub">타오바오 최저가(CNY)</span></th>
                 <th><span class="label-main">原价利润(CNY)</span><span class="label-sub">정가 마진(CNY)</span></th>
+                <th><span class="label-main">原价利润率</span><span class="label-sub">정가 마진율</span></th>
                 <th><span class="label-main">最低价利润(CNY)</span><span class="label-sub">최저가 마진(CNY)</span></th>
+                <th><span class="label-main">最低价利润率</span><span class="label-sub">최저가 마진율</span></th>
                 <th><span class="label-main">原价税率</span><span class="label-sub">정가 세율</span></th>
                 <th><span class="label-main">原价税金(CNY)</span><span class="label-sub">정가 세금(CNY)</span></th>
                 <th><span class="label-main">最低价税率</span><span class="label-sub">최저가 세율</span></th>
                 <th><span class="label-main">最低价税金(CNY)</span><span class="label-sub">최저가 세금(CNY)</span></th>
-                <th></th>
               </tr>
             </thead>
             <tbody id="productRows"></tbody>
@@ -99,6 +101,7 @@
 
     <template id="rowTemplate">
       <tr>
+        <td><button class="icon-button" data-action="remove" type="button" aria-label="删除商品">×</button></td>
         <td><input data-field="productUrl" aria-label="官网链接" type="url" placeholder="https://..." /></td>
         <td>
           <button class="extract-button" data-action="extract" type="button">提取</button>
@@ -129,12 +132,13 @@
         <td><input data-field="taobaoPrice" aria-label="淘宝原价(CNY)" type="number" min="0" step="0.01" placeholder="手动输入 / 직접 입력" /></td>
         <td><input data-field="taobaoLowPrice" aria-label="淘宝最低价(CNY)" type="number" min="0" step="0.01" placeholder="手动输入 / 직접 입력" /></td>
         <td data-output="normalProfit">¥0.00</td>
+        <td data-output="normalProfitRate">0.0%</td>
         <td data-output="discountProfit">¥0.00</td>
+        <td data-output="discountProfitRate">0.0%</td>
         <td data-output="normalTaxRate">0.0%</td>
         <td data-output="normalTax">¥0.00</td>
         <td data-output="discountTaxRate">0.0%</td>
         <td data-output="discountTax">¥0.00</td>
-        <td><button class="icon-button" data-action="remove" type="button" aria-label="删除商品">×</button></td>
       </tr>
     </template>
 

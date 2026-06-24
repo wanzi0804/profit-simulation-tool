@@ -42,14 +42,22 @@ const exportHeaders = {
   taobaoPrice: "淘宝原价(CNY)",
   taobaoLowPrice: "淘宝最低价(CNY)",
   normalProfit: "原价利润(CNY)",
+  normalProfitRate: "原价利润率",
   discountProfit: "最低价利润(CNY)",
+  discountProfitRate: "最低价利润率",
   normalTaxRate: "原价税率",
   normalTax: "原价税金(CNY)",
   discountTaxRate: "最低价税率",
   discountTax: "最低价税金(CNY)",
 };
 
-const percentKeys = new Set(["supplyRate", "normalTaxRate", "discountTaxRate"]);
+const percentKeys = new Set([
+  "supplyRate",
+  "normalProfitRate",
+  "discountProfitRate",
+  "normalTaxRate",
+  "discountTaxRate",
+]);
 const categoryLabels = {
   cosmetics: "化妆品",
   maskpack: "面膜",
@@ -176,6 +184,9 @@ function calculate(row) {
     data.taobaoLowPrice * config.sellerRate -
     cappedLogistics(data.taobaoLowPrice, config) -
     discountTax;
+  const normalProfitRate = data.taobaoPrice > 0 ? normalProfit / data.taobaoPrice : 0;
+  const discountProfitRate =
+    data.taobaoLowPrice > 0 ? discountProfit / data.taobaoLowPrice : 0;
 
   return {
     ...data,
@@ -188,7 +199,9 @@ function calculate(row) {
     discountTaxRate,
     discountTax,
     normalProfit,
+    normalProfitRate,
     discountProfit,
+    discountProfitRate,
   };
 }
 
@@ -222,7 +235,9 @@ function recalculate() {
     setOutput(row, "cnySupply", data.cnySupply, money);
     setOutput(row, "supplyRate", data.supplyRate, percent);
     setOutput(row, "normalProfit", data.normalProfit, money);
+    setOutput(row, "normalProfitRate", data.normalProfitRate, percent);
     setOutput(row, "discountProfit", data.discountProfit, money);
+    setOutput(row, "discountProfitRate", data.discountProfitRate, percent);
     setOutput(row, "normalTaxRate", data.normalTaxRate, percent);
     setOutput(row, "normalTax", data.normalTax, money);
     setOutput(row, "discountTaxRate", data.discountTaxRate, percent);
@@ -311,8 +326,8 @@ function excelRows() {
   tbody.querySelectorAll("tr").forEach((row, index) => {
     const data = calculate(row);
     const r = index + 2;
-    const normalTaxRateFormula = `IF(D${r}="化妆品",IF(M${r}/E${r}<10,9.1%,23.05%),IF(D${r}="面膜",IF(M${r}/E${r}<15,9.1%,23.05%),9.1%))`;
-    const discountTaxRateFormula = `IF(D${r}="化妆品",IF(N${r}/E${r}<10,9.1%,23.05%),IF(D${r}="面膜",IF(N${r}/E${r}<15,9.1%,23.05%),9.1%))`;
+    const normalTaxRateFormula = `IF(C${r}="化妆品",IF(L${r}/D${r}<10,9.1%,23.05%),IF(C${r}="面膜",IF(L${r}/D${r}<15,9.1%,23.05%),9.1%))`;
+    const discountTaxRateFormula = `IF(C${r}="化妆品",IF(M${r}/D${r}<10,9.1%,23.05%),IF(C${r}="面膜",IF(M${r}/D${r}<15,9.1%,23.05%),9.1%))`;
 
     rows.push([
       data.productUrl,
@@ -328,12 +343,14 @@ function excelRows() {
       formulaCell(`IF(G${r}>0,I${r}/G${r},0)`, data.supplyRate),
       data.taobaoPrice,
       data.taobaoLowPrice,
-      formulaCell(`M${r}-J${r}-M${r}*${config.taobaoPlatformRate}-M${r}*${config.sellerRate}-MIN(${config.krLogistics},${config.krLogistics}*M${r}/${config.freeShippingBase})-R${r}`, data.normalProfit),
-      formulaCell(`N${r}-J${r}-N${r}*${config.taobaoPlatformRate}-N${r}*${config.sellerRate}-MIN(${config.krLogistics},${config.krLogistics}*N${r}/${config.freeShippingBase})-T${r}`, data.discountProfit),
+      formulaCell(`L${r}-J${r}-L${r}*${config.taobaoPlatformRate}-L${r}*${config.sellerRate}-MIN(${config.krLogistics},${config.krLogistics}*L${r}/${config.freeShippingBase})-S${r}`, data.normalProfit),
+      formulaCell(`IF(L${r}>0,N${r}/L${r},0)`, data.normalProfitRate),
+      formulaCell(`M${r}-J${r}-M${r}*${config.taobaoPlatformRate}-M${r}*${config.sellerRate}-MIN(${config.krLogistics},${config.krLogistics}*M${r}/${config.freeShippingBase})-U${r}`, data.discountProfit),
+      formulaCell(`IF(M${r}>0,P${r}/M${r},0)`, data.discountProfitRate),
       formulaCell(normalTaxRateFormula, data.normalTaxRate),
-      formulaCell(`M${r}*Q${r}`, data.normalTax),
+      formulaCell(`L${r}*R${r}`, data.normalTax),
       formulaCell(discountTaxRateFormula, data.discountTaxRate),
-      formulaCell(`N${r}*S${r}`, data.discountTax),
+      formulaCell(`M${r}*T${r}`, data.discountTax),
     ]);
   });
 
