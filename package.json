@@ -1,0 +1,16 @@
+{
+  "name": "profit-simulation-tool",
+  "version": "1.0.0",
+  "private": true,
+  "description": "入驻商品利润模拟工具 / 입점 상품 마진 시뮬레이션",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "health": "node -e \"fetch('http://localhost:' + (process.env.PORT || 4177) + '/api/health').then(r => r.json()).then(console.log)\""
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {}
+}

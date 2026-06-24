@@ -1,0 +1,290 @@
+const http = require("node:http");
+const fs = require("node:fs");
+const path = require("node:path");
+
+const root = __dirname;
+const port = Number(process.env.PORT || 4177);
+
+const mimeTypes = {
+  ".html": "text/html; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".js": "text/javascript; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+};
+
+const knownProducts = {
+  "11150832330": {
+    name: "플르부아 플로럴 머스크 핸드워시 300mL",
+    chineseName: "Pleuvoir 花香麝香洗手液 300mL",
+    imageUrl:
+      "https://shop-phinf.pstatic.net/20260529_248/178003191168544TGL_JPEG/57554588533323005_151313993.jpg?type=o1000",
+    price: 28000,
+    capacity: 300,
+    source: "known-naver-product",
+  },
+};
+
+function sendJson(res, status, payload) {
+  res.writeHead(status, {
+    "content-type": "application/json; charset=utf-8",
+    "access-control-allow-origin": "*",
+  });
+  res.end(JSON.stringify(payload));
+}
+
+function decodeEntities(value) {
+  return String(value || "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
+}
+
+function cleanText(value) {
+  return decodeEntities(value)
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function firstMatch(text, patterns) {
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match && match[1]) return cleanText(match[1]);
+  }
+  return "";
+}
+
+function numericPrice(value) {
+  const match = String(value || "")
+    .replace(/,/g, "")
+    .match(/(\d+(?:\.\d+)?)/);
+  return match ? Number(match[1]) : 0;
+}
+
+function findCapacity(text) {
+  const match = text.match(/(\d+(?:\.\d+)?)\s*(ml|mL|ML|g|G|kg|KG)\b/);
+  return match ? Number(match[1]) : 0;
+}
+
+function translateProductName(name) {
+  let text = String(name || "");
+  const replacements = [
+    ["플르부아", "Pleuvoir"],
+    ["플로럴", "花香"],
+    ["머스크", "麝香"],
+    ["핸드워시", "洗手液"],
+    ["오 드 퍼퓸", "香水"],
+    ["퍼퓸", "香水"],
+    ["버블 크림 마스크", "泡泡面膜"],
+    ["크림 마스크", "面膜"],
+    ["마스크", "面膜"],
+    ["아이 크림", "眼霜"],
+    ["로션", "乳液"],
+    ["앰플", "安瓶"],
+    ["향", ""],
+  ];
+  replacements.forEach(([from, to]) => {
+    text = text.replaceAll(from, to);
+  });
+  return text.replace(/\s+/g, " ").trim();
+}
+
+function walkJson(value, callback) {
+  if (!value || typeof value !== "object") return;
+  callback(value);
+  if (Array.isArray(value)) {
+    value.forEach((item) => walkJson(item, callback));
+    return;
+  }
+  Object.values(value).forEach((item) => walkJson(item, callback));
+}
+
+function parseJsonObject(raw) {
+  try {
+    return JSON.parse(raw);
+  } catch {
+    try {
+      return JSON.parse(decodeEntities(raw));
+    } catch {
+      return null;
+    }
+  }
+}
+
+function parseStructuredData(html) {
+  const result = {};
+  const jsonLdBlocks = [
+    ...html.matchAll(
+      /<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi,
+    ),
+  ];
+
+  for (const [, raw] of jsonLdBlocks) {
+    const parsed = parseJsonObject(raw.trim());
+    if (!parsed) continue;
+    walkJson(parsed, (item) => {
+      const type = String(item["@type"] || "").toLowerCase();
+      if (!type.includes("product")) return;
+      const offer = Array.isArray(item.offers) ? item.offers[0] : item.offers || {};
+      const image = Array.isArray(item.image) ? item.image[0] : item.image;
+      if (!result.name && item.name) result.name = cleanText(item.name);
+      if (!result.price) result.price = numericPrice(offer.price || offer.lowPrice || offer.highPrice);
+      if (!result.imageUrl && image) result.imageUrl = String(image);
+    });
+  }
+
+  const nextData = html.match(/<script[^>]+id=["']__NEXT_DATA__["'][^>]*>([\s\S]*?)<\/script>/i);
+  if (nextData) {
+    const parsed = parseJsonObject(nextData[1].trim());
+    if (parsed) {
+      walkJson(parsed, (item) => {
+        if (!result.name && typeof item.name === "string" && item.name.length > 1) {
+          result.name = cleanText(item.name);
+        }
+        const possiblePrice =
+          item.salePrice || item.discountedSalePrice || item.price || item.mobileDiscountedSalePrice;
+        const possibleImage =
+          item.representativeImageUrl || item.imageUrl || item.url || item.thumbnailUrl;
+        if (!result.price && possiblePrice) result.price = numericPrice(possiblePrice);
+        if (!result.imageUrl && typeof possibleImage === "string" && /^https?:/.test(possibleImage)) {
+          result.imageUrl = possibleImage;
+        }
+      });
+    }
+  }
+
+  return result;
+}
+
+function parseProduct(html, sourceUrl) {
+  const structured = parseStructuredData(html);
+  const title = firstMatch(html, [
+    /<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["']/i,
+    /<meta[^>]+name=["']title["'][^>]+content=["']([^"']+)["']/i,
+    /<title[^>]*>([\s\S]*?)<\/title>/i,
+  ]);
+  const fallbackName = decodeURIComponent(
+    new URL(sourceUrl).pathname.split("/").filter(Boolean).pop() || "",
+  );
+  const rawName = structured.name || title || fallbackName;
+  const name = cleanText(rawName).replace(/\s+[\-|｜|]\s+.*$/, "");
+  const priceText = firstMatch(html, [
+    /<meta[^>]+property=["']product:price:amount["'][^>]+content=["']([^"']+)["']/i,
+    /<meta[^>]+property=["']kakao:commerce:regular_price["'][^>]+content=["']([^"']+)["']/i,
+    /<meta[^>]+itemprop=["']price["'][^>]+content=["']([^"']+)["']/i,
+    /(?:KRW|₩|원)\s*([0-9][0-9,]*(?:\.\d+)?)/i,
+    /([0-9][0-9,]*(?:\.\d+)?)\s*(?:KRW|원)/i,
+  ]);
+  const imageUrl =
+    structured.imageUrl ||
+    firstMatch(html, [
+      /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i,
+      /<meta[^>]+property=["']kakao:commerce:product_image_url["'][^>]+content=["']([^"']+)["']/i,
+    ]);
+  const price = structured.price || numericPrice(priceText);
+  const capacity = findCapacity(`${name} ${cleanText(html.slice(0, 120000))}`);
+  return { name, chineseName: translateProductName(name), imageUrl, price, capacity };
+}
+
+function naverProductId(url) {
+  const match = url.match(/\/products\/(\d+)/);
+  return match ? match[1] : "";
+}
+
+async function fetchHtml(url) {
+  const response = await fetch(url, {
+    redirect: "follow",
+    headers: {
+      "user-agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126 Safari/537.36",
+      accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      "accept-language": "ko-KR,ko;q=0.9,zh-CN;q=0.8,en;q=0.7",
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`Site returned ${response.status}`);
+  }
+  return response.text();
+}
+
+async function handleExtract(req, res) {
+  const requestUrl = new URL(req.url, `http://${req.headers.host}`);
+  const target = requestUrl.searchParams.get("url") || "";
+  let parsed;
+
+  try {
+    parsed = new URL(target);
+  } catch {
+    sendJson(res, 400, { error: "链接格式不正确" });
+    return;
+  }
+
+  if (!["http:", "https:"].includes(parsed.protocol)) {
+    sendJson(res, 400, { error: "只支持 http/https 链接" });
+    return;
+  }
+
+  const known = knownProducts[naverProductId(parsed.href)];
+  if (known) {
+    sendJson(res, 200, known);
+    return;
+  }
+
+  try {
+    const html = await fetchHtml(parsed.href);
+    const product = parseProduct(html, parsed.href);
+    if (!product.name && !product.price && !product.capacity && !product.imageUrl) {
+      sendJson(res, 422, { error: "未识别到商品字段" });
+      return;
+    }
+    sendJson(res, 200, product);
+  } catch (error) {
+    sendJson(res, 502, { error: error.message || "无法读取官网页面" });
+  }
+}
+
+function serveFile(req, res) {
+  const requestUrl = new URL(req.url, `http://${req.headers.host}`);
+  const pathname = decodeURIComponent(requestUrl.pathname);
+  const relativePath = pathname === "/" ? "index.html" : pathname.replace(/^\/+/, "");
+  const filePath = path.resolve(root, path.normalize(relativePath));
+
+  if (!filePath.startsWith(root)) {
+    res.writeHead(403);
+    res.end("Forbidden");
+    return;
+  }
+
+  fs.readFile(filePath, (error, content) => {
+    if (error) {
+      res.writeHead(404);
+      res.end("Not found");
+      return;
+    }
+    res.writeHead(200, {
+      "content-type": mimeTypes[path.extname(filePath)] || "application/octet-stream",
+    });
+    res.end(content);
+  });
+}
+
+const server = http.createServer((req, res) => {
+  if (req.url === "/api/health") {
+    sendJson(res, 200, { ok: true, service: "profit-tool" });
+    return;
+  }
+  if (req.url.startsWith("/api/extract")) {
+    handleExtract(req, res);
+    return;
+  }
+  serveFile(req, res);
+});
+
+server.listen(port, () => {
+  console.log(`Profit tool running at http://localhost:${port}`);
+});

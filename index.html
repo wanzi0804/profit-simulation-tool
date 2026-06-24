@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>入驻商品利润模拟工具</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="toolbar" aria-label="入驻商品利润模拟工具">
+        <div>
+          <h1>
+            <span class="title-main">入驻商品利润模拟</span>
+            <span class="title-sub">입점 상품 마진 시뮬레이션</span>
+          </h1>
+          <p class="intro-copy">
+            <span class="label-main">输入官网销售链接，自动提取商品图、商品名、韩国售价(KRW)和容量；淘宝价格、税金与利润均按人民币(CNY)计算。</span>
+            <span class="label-sub">공식몰 판매 링크를 입력하면 상품 이미지, 상품명, 한국 판매가(KRW), 용량을 자동 추출합니다. 타오바오 가격, 세금, 마진은 모두 위안화(CNY) 기준입니다.</span>
+          </p>
+        </div>
+        <div class="toolbar-actions">
+          <button id="addRowBtn" class="primary" type="button">
+            <span class="button-main">新增商品</span>
+            <span class="button-sub">상품 추가</span>
+          </button>
+          <button id="exportBtn" type="button">
+            <span class="button-main">导出 CSV</span>
+            <span class="button-sub">CSV 내보내기</span>
+          </button>
+          <button id="exportExcelBtn" type="button">
+            <span class="button-main">导出 Excel</span>
+            <span class="button-sub">Excel 내보내기</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="settings-grid" aria-label="全局参数">
+        <label>
+          <span class="label-main">汇率：1 CNY = KRW</span>
+          <span class="label-sub">환율: 1 CNY = KRW</span>
+          <input id="exchangeRate" type="number" min="0" step="0.01" value="195" />
+        </label>
+        <label>
+          <span class="label-main">韩国物流费(CNY)</span>
+          <span class="label-sub">한국 물류비(CNY)</span>
+          <input id="krLogistics" type="number" min="0" step="0.01" value="23" />
+        </label>
+        <label>
+          <span class="label-main">免配送费基准(CNY)</span>
+          <span class="label-sub">무료배송 기준(CNY)</span>
+          <input id="freeShippingBase" type="number" min="0" step="0.01" value="99" />
+        </label>
+        <label>
+          <span class="label-main">淘宝平台费率(%)</span>
+          <span class="label-sub">타오바오 플랫폼 수수료율(%)</span>
+          <input id="taobaoPlatformRate" type="number" min="0" step="0.01" value="3.5" />
+        </label>
+        <label>
+          <span class="label-main">卖家/达人佣金率(%)</span>
+          <span class="label-sub">셀러/왕홍 수수료율(%)</span>
+          <input id="sellerRate" type="number" min="0" step="0.01" value="25" />
+        </label>
+      </section>
+
+      <section class="table-panel">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th><span class="label-main">官网链接</span><span class="label-sub">공식몰 링크</span></th>
+                <th><span class="label-main">提取</span><span class="label-sub">추출</span></th>
+                <th><span class="label-main">产品图</span><span class="label-sub">상품 이미지</span></th>
+                <th><span class="label-main">品类</span><span class="label-sub">카테고리</span></th>
+                <th><span class="label-main">容量</span><span class="label-sub">용량</span></th>
+                <th><span class="label-main">中文产品名</span><span class="label-sub">중문 상품명</span></th>
+                <th><span class="label-main">产品名</span><span class="label-sub">상품명</span></th>
+                <th><span class="label-main">韩国售价(KRW)</span><span class="label-sub">한국 판매가(KRW)</span></th>
+                <th><span class="label-main">韩国售价(CNY)</span><span class="label-sub">한국 판매가(CNY)</span></th>
+                <th><span class="label-main">供货价(KRW)</span><span class="label-sub">공급가(KRW)</span></th>
+                <th><span class="label-main">供货价(CNY)</span><span class="label-sub">공급가(CNY)</span></th>
+                <th><span class="label-main">供货率</span><span class="label-sub">공급률</span></th>
+                <th><span class="label-main">淘宝原价(CNY)</span><span class="label-sub">타오바오 정가(CNY)</span></th>
+                <th><span class="label-main">淘宝最低价(CNY)</span><span class="label-sub">타오바오 최저가(CNY)</span></th>
+                <th><span class="label-main">原价利润(CNY)</span><span class="label-sub">정가 마진(CNY)</span></th>
+                <th><span class="label-main">最低价利润(CNY)</span><span class="label-sub">최저가 마진(CNY)</span></th>
+                <th><span class="label-main">原价税率</span><span class="label-sub">정가 세율</span></th>
+                <th><span class="label-main">原价税金(CNY)</span><span class="label-sub">정가 세금(CNY)</span></th>
+                <th><span class="label-main">最低价税率</span><span class="label-sub">최저가 세율</span></th>
+                <th><span class="label-main">最低价税金(CNY)</span><span class="label-sub">최저가 세금(CNY)</span></th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="productRows"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <template id="rowTemplate">
+      <tr>
+        <td><input data-field="productUrl" aria-label="官网链接" type="url" placeholder="https://..." /></td>
+        <td>
+          <button class="extract-button" data-action="extract" type="button">提取</button>
+          <span class="extract-status" data-output="status"></span>
+        </td>
+        <td>
+          <div class="product-image-cell">
+            <img data-output="productImage" alt="产品图" />
+            <span data-output="imagePlaceholder">无图</span>
+          </div>
+          <input data-field="imageUrl" type="hidden" />
+        </td>
+        <td>
+          <select data-field="category" aria-label="品类">
+            <option value="cosmetics">化妆品 / 화장품</option>
+            <option value="maskpack">面膜 / 마스크팩</option>
+            <option value="other">其他 / 기타</option>
+          </select>
+        </td>
+        <td><input data-field="capacity" aria-label="容量" type="number" min="0" step="0.01" placeholder="自动提取" /></td>
+        <td><textarea data-field="chineseName" aria-label="中文产品名" rows="2" placeholder="自动翻译"></textarea></td>
+        <td><textarea data-field="name" aria-label="产品名" rows="2" placeholder="自动提取"></textarea></td>
+        <td><input data-field="krwRetail" aria-label="韩国售价(KRW)" type="number" min="0" step="1" placeholder="自动提取" /></td>
+        <td data-output="cnyRetail">¥0.00</td>
+        <td><input data-field="krwSupply" aria-label="供货价(KRW)" type="number" min="0" step="1" /></td>
+        <td data-output="cnySupply">¥0.00</td>
+        <td data-output="supplyRate">0.0%</td>
+        <td><input data-field="taobaoPrice" aria-label="淘宝原价(CNY)" type="number" min="0" step="0.01" /></td>
+        <td><input data-field="taobaoLowPrice" aria-label="淘宝最低价(CNY)" type="number" min="0" step="0.01" /></td>
+        <td data-output="normalProfit">¥0.00</td>
+        <td data-output="discountProfit">¥0.00</td>
+        <td data-output="normalTaxRate">0.0%</td>
+        <td data-output="normalTax">¥0.00</td>
+        <td data-output="discountTaxRate">0.0%</td>
+        <td data-output="discountTax">¥0.00</td>
+        <td><button class="icon-button" data-action="remove" type="button" aria-label="删除商品">×</button></td>
+      </tr>
+    </template>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
