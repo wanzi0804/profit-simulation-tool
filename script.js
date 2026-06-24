@@ -18,7 +18,7 @@ const exportHeaders = {
   category: "品类",
   capacity: "容量",
   chineseName: "中文产品名",
-  name: "产品名",
+  name: "韩文产品名",
   krwRetail: "韩国售价(KRW)",
   cnyRetail: "韩国售价(CNY)",
   krwSupply: "供货价(KRW)",
@@ -465,7 +465,7 @@ async function extractProduct(row) {
 
     const found = [
       payload.imageUrl ? "产品图" : "",
-      payload.name ? "产品名" : "",
+      payload.name ? "韩文产品名" : "",
       payload.chineseName || payload.name ? "中文名" : "",
       payload.price ? "韩国售价" : "",
       payload.capacity ? "容量" : "",
