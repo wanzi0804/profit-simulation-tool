@@ -263,6 +263,58 @@ function translateProductName(name) {
   return text.replace(/\s+/g, " ").trim();
 }
 
+function openAITranslationText(payload) {
+  if (typeof payload?.output_text === "string") return payload.output_text;
+  const content = payload?.output?.flatMap((item) => item.content || []) || [];
+  const textItem = content.find((item) => typeof item.text === "string");
+  return textItem?.text || "";
+}
+
+async function translateProductNameWithAI(name) {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey || !name) return "";
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000);
+  try {
+    const response = await fetch("https://api.openai.com/v1/responses", {
+      method: "POST",
+      signal: controller.signal,
+      headers: {
+        authorization: `Bearer ${apiKey}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+        input: [
+          {
+            role: "system",
+            content:
+              "你是跨境电商商品名翻译助手。把韩文或英文商品名翻译成简体中文商品名，用于利润测算表。保留品牌名、型号、色号、容量、数量、英文缩写和数字。不要解释，不要加引号，只输出一个中文商品名。",
+          },
+          {
+            role: "user",
+            content: String(name),
+          },
+        ],
+        temperature: 0.2,
+        max_output_tokens: 120,
+      }),
+    });
+    if (!response.ok) return "";
+    const payload = await response.json();
+    return cleanText(openAITranslationText(payload)).replace(/^["'“”]+|["'“”]+$/g, "");
+  } catch {
+    return "";
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function translatedProductName(name) {
+  return (await translateProductNameWithAI(name)) || translateProductName(name);
+}
+
 function walkJson(value, callback) {
   if (!value || typeof value !== "object") return;
   callback(value);
@@ -335,7 +387,7 @@ function parseStructuredData(html) {
   return result;
 }
 
-function parseProduct(html, sourceUrl) {
+async function parseProduct(html, sourceUrl) {
   const structured = parseStructuredData(html);
   const title = firstMatch(html, [
     /<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["']/i,
@@ -362,7 +414,7 @@ function parseProduct(html, sourceUrl) {
     ]);
   const price = structured.price || numericPrice(priceText);
   const capacity = structured.capacity || findCapacity(`${name} ${cleanText(html.slice(0, 120000))}`);
-  const chineseName = translateProductName(name);
+  const chineseName = await translatedProductName(name);
   const category = inferCategory(name, chineseName, sourceUrl);
   return { name, chineseName, imageUrl, price, capacity, category };
 }
@@ -414,7 +466,7 @@ async function handleExtract(req, res) {
 
   try {
     const html = await fetchHtml(parsed.href);
-    const product = parseProduct(html, parsed.href);
+    const product = await parseProduct(html, parsed.href);
     if (!product.name && !product.price && !product.capacity && !product.imageUrl) {
       sendJson(res, 422, { error: "未识别到商品字段" });
       return;
