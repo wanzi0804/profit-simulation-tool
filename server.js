@@ -71,6 +71,70 @@ function findCapacity(text) {
   return match ? Number(match[1]) : 0;
 }
 
+function inferCategory(...parts) {
+  const text = parts
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  const compact = text.replace(/[\s_-]+/g, "");
+
+  const maskTerms = [
+    "mask pack",
+    "sheet mask",
+    "mask sheet",
+    "facial mask",
+    "sleeping mask",
+    "modeling mask",
+    "hydrogel mask",
+    "maskpack",
+    "sheetmask",
+    "\ub9c8\uc2a4\ud06c\ud329",
+    "\uc2dc\ud2b8\ub9c8\uc2a4\ud06c",
+    "\uc2dc\ud2b8\ud329",
+    "\uc218\uba74\ud329",
+    "\ubaa8\ub378\ub9c1\ud329",
+    "\uc6cc\uc2dc\uc624\ud504\ud329",
+    "\ub9c8\uc2a4\ud06c",
+    "\u9762\u819c",
+  ];
+  if (maskTerms.some((term) => text.includes(term) || compact.includes(term.replace(/\s+/g, "")))) {
+    return "maskpack";
+  }
+
+  const otherTerms = [
+    "shampoo",
+    "conditioner",
+    "treatment",
+    "hand wash",
+    "body wash",
+    "bodywash",
+    "soap",
+    "toothbrush",
+    "towel",
+    "pouch",
+    "mirror",
+    "candle",
+    "diffuser",
+    "\uc0f4\ud478",
+    "\ucee8\ub514\uc154\ub108",
+    "\ud2b8\ub9ac\ud2b8\uba3c\ud2b8",
+    "\ud578\ub4dc\uc6cc\uc2dc",
+    "\ubc14\ub514\uc6cc\uc2dc",
+    "\ube44\ub204",
+    "\uc591\uce58",
+    "\ud0c0\uc6d4",
+    "\ud30c\uc6b0\uce58",
+    "\uac70\uc6b8",
+    "\uce94\ub4e4",
+    "\ub514\ud4e8\uc800",
+  ];
+  if (otherTerms.some((term) => text.includes(term) || compact.includes(term.replace(/\s+/g, "")))) {
+    return "other";
+  }
+
+  return text.trim() ? "cosmetics" : "";
+}
+
 function detectEncoding(bytes, contentType = "") {
   const headerCharset = String(contentType).match(/charset=([^;\s]+)/i)?.[1];
   const head = new TextDecoder("latin1").decode(bytes.slice(0, 12000));
@@ -298,7 +362,9 @@ function parseProduct(html, sourceUrl) {
     ]);
   const price = structured.price || numericPrice(priceText);
   const capacity = structured.capacity || findCapacity(`${name} ${cleanText(html.slice(0, 120000))}`);
-  return { name, chineseName: translateProductName(name), imageUrl, price, capacity };
+  const chineseName = translateProductName(name);
+  const category = inferCategory(name, chineseName, sourceUrl);
+  return { name, chineseName, imageUrl, price, capacity, category };
 }
 
 function naverProductId(url) {
