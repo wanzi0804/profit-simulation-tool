@@ -108,6 +108,10 @@ function inferCategory(...parts) {
     "hand wash",
     "body wash",
     "bodywash",
+    "perfume",
+    "fragrance",
+    "eau de parfum",
+    "eau de toilette",
     "soap",
     "toothbrush",
     "towel",
@@ -120,6 +124,10 @@ function inferCategory(...parts) {
     "\ud2b8\ub9ac\ud2b8\uba3c\ud2b8",
     "\ud578\ub4dc\uc6cc\uc2dc",
     "\ubc14\ub514\uc6cc\uc2dc",
+    "\uc624 \ub4dc \ud37c\ud4f8",
+    "\uc624\ub4dc\ud37c\ud4f8",
+    "\ud37c\ud4f8",
+    "\ud5a5\uc218",
     "\ube44\ub204",
     "\uc591\uce58",
     "\ud0c0\uc6d4",
@@ -159,6 +167,7 @@ function decodeHtml(bytes, contentType = "") {
 function translateProductName(name) {
   let text = String(name || "");
   const replacements = [
+    ["\ub77c\uc2a4\ud2b8 \uc774\ubaa8\uc158", "Last Emotion"],
     ["플르부아", "Pleuvoir"],
     ["플로럴", "花香"],
     ["머스크", "麝香"],
@@ -290,7 +299,7 @@ async function translateProductNameWithAI(name) {
           {
             role: "system",
             content:
-              "你是跨境电商商品名翻译助手。把韩文或英文商品名翻译成简体中文商品名，用于利润测算表。保留品牌名、型号、色号、容量、数量、英文缩写和数字。不要解释，不要加引号，只输出一个中文商品名。",
+              "Translate Korean or English ecommerce product names into Simplified Chinese for a product profit spreadsheet. Do not leave any Korean Hangul characters in the final answer. Keep brand names, model names, shade numbers, capacity, quantities, English abbreviations, and digits. Translate product type words naturally, for example: '오 드 퍼퓸' = '淡香精', '앰플' = '安瓶', '세럼' = '精华'. If a Korean product line has an English-like name, romanize it or translate it, but never output Hangul. Example: '라스트 이모션 오 드 퍼퓸' -> 'Last Emotion 淡香精'. Output only one product name, no quotes and no explanation.",
           },
           {
             role: "user",
@@ -312,7 +321,8 @@ async function translateProductNameWithAI(name) {
 }
 
 async function translatedProductName(name) {
-  return (await translateProductNameWithAI(name)) || translateProductName(name);
+  const aiName = await translateProductNameWithAI(name);
+  return aiName ? translateProductName(aiName) : translateProductName(name);
 }
 
 function walkJson(value, callback) {

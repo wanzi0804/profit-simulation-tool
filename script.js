@@ -98,6 +98,10 @@ function inferCategory(...parts) {
     "hand wash",
     "body wash",
     "bodywash",
+    "perfume",
+    "fragrance",
+    "eau de parfum",
+    "eau de toilette",
     "soap",
     "toothbrush",
     "towel",
@@ -110,6 +114,10 @@ function inferCategory(...parts) {
     "\ud2b8\ub9ac\ud2b8\uba3c\ud2b8",
     "\ud578\ub4dc\uc6cc\uc2dc",
     "\ubc14\ub514\uc6cc\uc2dc",
+    "\uc624 \ub4dc \ud37c\ud4f8",
+    "\uc624\ub4dc\ud37c\ud4f8",
+    "\ud37c\ud4f8",
+    "\ud5a5\uc218",
     "\ube44\ub204",
     "\uc591\uce58",
     "\ud0c0\uc6d4",
@@ -226,6 +234,7 @@ function cappedLogistics(price, config) {
 function translateProductName(name) {
   let text = String(name || "");
   const replacements = [
+    ["\ub77c\uc2a4\ud2b8 \uc774\ubaa8\uc158", "Last Emotion"],
     ["플르부아", "Pleuvoir"],
     ["플로럴", "花香"],
     ["머스크", "麝香"],
