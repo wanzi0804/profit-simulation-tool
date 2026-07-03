@@ -305,6 +305,13 @@ th {
   background: #f6f1e9;
   height: 66px;
   color: #211d19;
+  font-family:
+    "Microsoft YaHei",
+    "Malgun Gothic",
+    "Apple SD Gothic Neo",
+    "PingFang SC",
+    system-ui,
+    sans-serif;
   font-size: 13px;
   font-weight: 750;
   line-height: 1.2;
@@ -314,19 +321,19 @@ th {
 
 th .label-main {
   color: #15120f;
-  font-size: 12.5px;
-  font-weight: 720;
-  line-height: 1.18;
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.2;
   white-space: nowrap;
   overflow-wrap: normal;
 }
 
 th .label-sub {
-  margin-top: 4px;
+  margin-top: 5px;
   color: #4c4339;
   font-size: 12.5px;
-  font-weight: 720;
-  line-height: 1.18;
+  font-weight: 600;
+  line-height: 1.2;
   white-space: nowrap;
   overflow-wrap: normal;
   word-break: keep-all;
@@ -724,8 +731,8 @@ body.capture-mode th {
 }
 
 body.capture-mode th .label-main {
-  font-size: 8.8px;
-  line-height: 1.08;
+  font-size: 9.6px;
+  line-height: 1.12;
   white-space: normal;
   overflow-wrap: anywhere;
   word-break: keep-all;
@@ -733,8 +740,9 @@ body.capture-mode th .label-main {
 
 body.capture-mode th .label-sub {
   margin-top: 3px;
-  font-size: 8.8px;
-  line-height: 1.08;
+  font-size: 8.6px;
+  font-weight: 600;
+  line-height: 1.12;
   white-space: normal;
   overflow-wrap: anywhere;
   word-break: keep-all;
