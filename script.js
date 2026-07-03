@@ -515,16 +515,16 @@ function importRecordFile(file) {
 async function extractProduct(row) {
   const url = row.querySelector('[data-field="productUrl"]').value.trim();
   if (!url) {
-    setStatus(row, "请先输入链接", "error");
+    setStatus(row, "请先输入链接 / 링크를 먼저 입력하세요", "error");
     return;
   }
 
   const apiBase = location.protocol === "file:" ? "http://localhost:4177" : "";
-  setStatus(row, "提取中", "loading");
+  setStatus(row, "提取中 / 추출 중", "loading");
   try {
     const response = await fetch(`${apiBase}/api/extract?url=${encodeURIComponent(url)}`);
     const payload = await response.json();
-    if (!response.ok) throw new Error(payload.error || "提取失败");
+    if (!response.ok) throw new Error(payload.error || "提取失败 / 추출 실패");
 
     if (payload.imageUrl) row.querySelector('[data-field="imageUrl"]').value = payload.imageUrl;
     if (payload.name) row.querySelector('[data-field="name"]').value = payload.name;
@@ -549,12 +549,15 @@ async function extractProduct(row) {
 
     setStatus(
       row,
-      found.length ? `已提取 ${found.join(" / ")}` : "未识别到字段",
+      found.length
+        ? `已提取 / 추출 완료：${found.join(" / ")}`
+        : "未识别到字段 / 인식된 항목 없음",
       found.length ? "ok" : "error",
     );
     recalculate();
   } catch (error) {
-    setStatus(row, error.message || "提取失败", "error");
+    const message = error.message || "提取失败 / 추출 실패";
+    setStatus(row, message.includes("/") ? message : `${message} / 추출 실패`, "error");
   }
 }
 
@@ -923,7 +926,7 @@ tbody.addEventListener("click", (event) => {
     if (!tbody.querySelector("tr")) addRow({ category: "cosmetics" });
     recalculate();
   }
-  if (event.target.matches('[data-action="extract"]')) {
+  if (event.target.closest('[data-action="extract"]')) {
     extractProduct(row);
   }
 });

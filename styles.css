@@ -600,9 +600,9 @@ textarea[placeholder*="自动"] {
 }
 
 .extract-button {
-  width: 64px;
-  min-height: 34px;
-  padding: 0 10px;
+  width: 68px;
+  min-height: 42px;
+  padding: 5px 10px;
 }
 
 .extract-status {
@@ -612,6 +612,7 @@ textarea[placeholder*="自动"] {
   color: var(--muted);
   font-size: 12px;
   line-height: 1.25;
+  word-break: keep-all;
 }
 
 .extract-status[data-state="ok"] {
