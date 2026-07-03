@@ -72,7 +72,7 @@ body {
 
 h1 {
   margin: 0;
-  font-size: 28px;
+  font-size: 27px;
   line-height: 1.2;
   letter-spacing: 0;
 }
@@ -93,9 +93,9 @@ h1 {
 
 .title-sub {
   margin-top: 4px;
-  color: #536274;
-  font-size: 16px;
-  font-weight: 650;
+  color: #263b52;
+  font-size: 21px;
+  font-weight: 760;
 }
 
 p {
@@ -110,8 +110,9 @@ p {
 
 .intro-copy .label-sub {
   margin-top: 3px;
-  color: #6f7f92;
-  font-size: 13px;
+  color: #4f647c;
+  font-size: 14px;
+  font-weight: 560;
   line-height: 1.35;
 }
 
@@ -217,6 +218,20 @@ button:active {
   margin-bottom: 10px;
 }
 
+.settings-grid .label-main,
+.settings-grid .label-sub {
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.settings-grid .label-main {
+  color: #3d5066;
+}
+
+.settings-grid .label-sub {
+  color: #4f647c;
+}
+
 .table-panel {
   background: var(--panel);
   border: 1px solid var(--line);
@@ -289,19 +304,53 @@ th {
 }
 
 th .label-main {
+  color: #1f3652;
+  font-size: 12.5px;
+  font-weight: 720;
+  line-height: 1.18;
   white-space: nowrap;
   overflow-wrap: normal;
 }
 
 th .label-sub {
-  margin-top: 5px;
-  color: #5d7086;
+  margin-top: 4px;
+  color: #2f4a67;
   font-size: 12.5px;
-  font-weight: 600;
-  line-height: 1.2;
+  font-weight: 720;
+  line-height: 1.18;
   white-space: nowrap;
   overflow-wrap: normal;
   word-break: keep-all;
+}
+
+.manual-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 18px;
+  margin-bottom: 5px;
+  padding: 2px 7px;
+  border: 1px solid #e5c46b;
+  border-radius: 999px;
+  background: #fff6d8;
+  color: #8a5a00;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+th.manual-col {
+  background: linear-gradient(180deg, #fff7d7, #fff0b8);
+  color: #5f4300;
+  box-shadow:
+    inset 0 -1px 0 #dfc365,
+    inset 0 3px 0 #f2c94c;
+}
+
+th.manual-col .label-main,
+th.manual-col .label-sub {
+  color: #4d3a00;
 }
 
 tbody tr {
@@ -311,6 +360,11 @@ tbody tr {
 
 tbody td {
   background: #ffffff;
+}
+
+tbody td.manual-cell {
+  background: #fffdf3;
+  box-shadow: inset 0 0 0 1px rgba(226, 188, 74, 0.32);
 }
 
 tbody tr:nth-child(even) {
@@ -503,6 +557,20 @@ textarea:focus {
     0 8px 16px rgba(15, 23, 42, 0.06);
 }
 
+td.manual-cell input {
+  border-color: #d6b44f;
+  background: #fffaf0;
+  box-shadow: 0 0 0 2px rgba(242, 201, 76, 0.12);
+  font-weight: 700;
+}
+
+td.manual-cell input:focus {
+  border-color: #b88700;
+  box-shadow:
+    0 0 0 3px rgba(242, 201, 76, 0.28),
+    0 8px 16px rgba(83, 63, 0, 0.08);
+}
+
 input[placeholder*="手动输入"],
 input[placeholder*="직접 입력"] {
   background: #fffefa;
@@ -641,11 +709,13 @@ body.capture-mode td {
 }
 
 body.capture-mode th {
-  height: 54px;
+  height: 58px;
   font-size: 9.6px;
 }
 
 body.capture-mode th .label-main {
+  font-size: 8.8px;
+  line-height: 1.08;
   white-space: normal;
   overflow-wrap: anywhere;
   word-break: keep-all;
@@ -653,10 +723,18 @@ body.capture-mode th .label-main {
 
 body.capture-mode th .label-sub {
   margin-top: 3px;
-  font-size: 8.6px;
+  font-size: 8.8px;
+  line-height: 1.08;
   white-space: normal;
   overflow-wrap: anywhere;
   word-break: keep-all;
+}
+
+body.capture-mode .manual-badge {
+  min-height: 14px;
+  margin-bottom: 2px;
+  padding: 1px 4px;
+  font-size: 7.8px;
 }
 
 body.capture-mode input,
