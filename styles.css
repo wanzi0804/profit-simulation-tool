@@ -1,7 +1,7 @@
 :root {
   color-scheme: light;
-  --bg: #f5f2ec;
-  --bg-soft: #eee8df;
+  --bg: #f4f1eb;
+  --bg-soft: #ebe5da;
   --panel: #ffffff;
   --ink: #111111;
   --muted: #6b6258;
@@ -11,6 +11,7 @@
   --accent: #b87425;
   --accent-strong: #8f5516;
   --accent-soft: #fff4df;
+  --charcoal: #171717;
   --blue-soft: #f4f0e9;
   --gain: #047857;
   --loss: #b91c1c;
@@ -27,8 +28,7 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 50% -180px, rgba(184, 116, 37, 0.13), transparent 360px),
-    linear-gradient(180deg, #ffffff 0, var(--bg-soft) 210px, var(--bg) 560px);
+    linear-gradient(180deg, #fbfaf7 0, var(--bg-soft) 260px, var(--bg) 100%);
   color: var(--ink);
   font-family:
     Inter,
@@ -42,7 +42,57 @@ body {
 .app-shell {
   width: calc(100% - 24px);
   margin: 0 auto;
-  padding: 22px 0 28px;
+  padding: 16px 0 28px;
+}
+
+.system-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  min-height: 42px;
+  margin-bottom: 12px;
+  padding: 0 4px;
+  color: #534b43;
+}
+
+.system-kicker {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  margin-right: 10px;
+  padding: 0 9px;
+  border: 1px solid rgba(184, 116, 37, 0.28);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--accent-strong);
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+}
+
+.system-title {
+  color: #27221d;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.system-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.system-meta span {
+  min-height: 24px;
+  padding: 4px 9px;
+  border: 1px solid rgba(23, 23, 23, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.62);
+  color: #6b6258;
+  font-size: 11px;
+  font-weight: 700;
 }
 
 .toolbar {
@@ -50,13 +100,15 @@ body {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 20px;
-  padding: 25px 26px 23px;
+  gap: 28px;
+  padding: 28px 30px 26px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(253, 252, 249, 0.96));
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  box-shadow: var(--shadow);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 253, 249, 0.96));
+  border: 1px solid rgba(23, 23, 23, 0.08);
+  border-radius: 12px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 22px 50px rgba(17, 17, 17, 0.075);
   overflow: hidden;
 }
 
@@ -64,8 +116,8 @@ body {
   content: "";
   position: absolute;
   inset: 0 0 auto;
-  height: 3px;
-  background: linear-gradient(90deg, #111111, #111111 46%, var(--accent));
+  height: 4px;
+  background: linear-gradient(90deg, var(--charcoal), var(--charcoal) 58%, var(--accent));
 }
 
 .toolbar > * {
@@ -74,7 +126,7 @@ body {
 
 h1 {
   margin: 0;
-  font-size: 28px;
+  font-size: 29px;
   line-height: 1.2;
   letter-spacing: 0;
 }
@@ -108,6 +160,7 @@ p {
 .intro-copy .label-main {
   color: #4a443d;
   font-size: 14px;
+  max-width: 980px;
 }
 
 .intro-copy .label-sub {
@@ -116,6 +169,7 @@ p {
   font-size: 14px;
   font-weight: 560;
   line-height: 1.35;
+  max-width: 980px;
 }
 
 .toolbar-actions {
@@ -128,8 +182,8 @@ p {
 
 button {
   min-height: 48px;
-  border: 1px solid #d8d0c4;
-  border-radius: 6px;
+  border: 1px solid rgba(23, 23, 23, 0.11);
+  border-radius: 7px;
   background: linear-gradient(180deg, #ffffff, #fbfaf7);
   color: var(--ink);
   padding: 6px 14px;
@@ -168,8 +222,8 @@ button:active {
 }
 
 .primary {
-  background: linear-gradient(180deg, #1b1b1b, #0f0f0f);
-  border-color: #111111;
+  background: linear-gradient(180deg, #202020, #101010);
+  border-color: #101010;
   color: #ffffff;
   box-shadow:
     0 10px 22px rgba(17, 17, 17, 0.16),
@@ -197,9 +251,11 @@ button:active {
   padding: 16px;
   background:
     linear-gradient(180deg, #ffffff, #fffefa);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  box-shadow: var(--shadow-soft);
+  border: 1px solid rgba(23, 23, 23, 0.08);
+  border-radius: 12px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 10px 24px rgba(17, 17, 17, 0.045);
   transition:
     border-color 0.16s ease,
     box-shadow 0.16s ease,
@@ -208,7 +264,9 @@ button:active {
 
 .settings-grid label:hover {
   border-color: var(--line-strong);
-  box-shadow: 0 16px 32px rgba(17, 17, 17, 0.08);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 16px 32px rgba(17, 17, 17, 0.07);
   transform: translateY(-1px);
 }
 
@@ -243,9 +301,11 @@ button:active {
 
 .table-panel {
   background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  box-shadow: var(--shadow);
+  border: 1px solid rgba(23, 23, 23, 0.09);
+  border-radius: 12px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 22px 50px rgba(17, 17, 17, 0.075);
   overflow: hidden;
 }
 
@@ -274,7 +334,7 @@ button:active {
   justify-content: flex-start;
   padding: 10px 12px 12px;
   border-top: 1px solid var(--line);
-  background: linear-gradient(180deg, #fffefa, #f5f1e9);
+  background: linear-gradient(180deg, #fffefa, #f4efe7);
 }
 
 .table-footer-actions button {
@@ -292,7 +352,7 @@ table {
 
 th,
 td {
-  border-bottom: 1px solid #e8e1d7;
+  border-bottom: 1px solid #e9e1d6;
   padding: 13px 8px;
   text-align: right;
   vertical-align: middle;
@@ -302,7 +362,7 @@ th {
   position: sticky;
   top: 0;
   z-index: 1;
-  background: #f6f1e9;
+  background: #f5efe6;
   height: 66px;
   color: #211d19;
   font-family:
@@ -316,7 +376,9 @@ th {
   font-weight: 750;
   line-height: 1.2;
   vertical-align: middle;
-  box-shadow: inset 0 -1px 0 #ddd2c3;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.78),
+    inset 0 -1px 0 #ddd2c3;
 }
 
 th .label-main {
@@ -389,7 +451,7 @@ tbody tr:nth-child(even) {
 }
 
 tbody tr:hover {
-  background: #fffaf1;
+  background: #fffaf2;
 }
 
 tbody tr:hover td {
@@ -656,6 +718,21 @@ body.capture-mode .app-shell {
   padding: 12px 0;
 }
 
+body.capture-mode .system-bar {
+  min-height: 28px;
+  margin-bottom: 6px;
+}
+
+body.capture-mode .system-kicker,
+body.capture-mode .system-title,
+body.capture-mode .system-meta span {
+  font-size: 9.5px;
+}
+
+body.capture-mode .system-meta {
+  gap: 4px;
+}
+
 body.capture-mode .toolbar {
   align-items: center;
   padding: 16px 18px;
@@ -891,6 +968,16 @@ body.capture-mode td:nth-child(23) {
   .toolbar {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .system-bar {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .system-meta {
+    justify-content: flex-start;
   }
 
   .toolbar-actions {
