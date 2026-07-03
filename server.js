@@ -167,6 +167,14 @@ function decodeHtml(bytes, contentType = "") {
 function translateProductName(name) {
   let text = String(name || "");
   const replacements = [
+    ["\ub124\uc624\uc2a4\ub7a9", "NeosLab"],
+    ["\uce60 \ub2e4\uc6b4", "Chill Down"],
+    ["\uce60\ub2e4\uc6b4", "Chill Down"],
+    ["\uac94 \uc544\uc774 \ub9c8\uc2a4\ud06c", "凝胶眼膜"],
+    ["\uc544\uc774 \ub9c8\uc2a4\ud06c", "眼膜"],
+    ["\uce74\ud14c\ud0a8", "儿茶素"],
+    ["\uac94", "凝胶"],
+    ["\uc544\uc774", "眼部"],
     ["\ub77c\uc2a4\ud2b8 \uc774\ubaa8\uc158", "Last Emotion"],
     ["플르부아", "Pleuvoir"],
     ["플로럴", "花香"],
@@ -279,9 +287,36 @@ function openAITranslationText(payload) {
   return textItem?.text || "";
 }
 
-async function translateProductNameWithAI(name) {
+function containsHangul(value) {
+  return /[\u1100-\u11ff\u3130-\u318f\uac00-\ud7af]/.test(String(value || ""));
+}
+
+function hangulTokens(value) {
+  return [...new Set(String(value || "").match(/[\uac00-\ud7af]+/g) || [])].slice(0, 10);
+}
+
+function romanizeHangulSyllable(char) {
+  const code = char.codePointAt(0);
+  if (code < 0xac00 || code > 0xd7a3) return char;
+  const index = code - 0xac00;
+  const initial = Math.floor(index / 588);
+  const vowel = Math.floor((index % 588) / 28);
+  const final = index % 28;
+  const initials = ["g", "kk", "n", "d", "tt", "r", "m", "b", "pp", "s", "ss", "", "j", "jj", "ch", "k", "t", "p", "h"];
+  const vowels = ["a", "ae", "ya", "yae", "eo", "e", "yeo", "ye", "o", "wa", "wae", "oe", "yo", "u", "wo", "we", "wi", "yu", "eu", "ui", "i"];
+  const finals = ["", "k", "k", "ks", "n", "nj", "nh", "t", "l", "lk", "lm", "lb", "ls", "lt", "lp", "lh", "m", "p", "ps", "t", "t", "ng", "t", "t", "k", "t", "p", "h"];
+  return `${initials[initial]}${vowels[vowel]}${finals[final]}`;
+}
+
+function romanizeHangulText(value) {
+  return String(value || "").replace(/[\uac00-\ud7af]+/g, (token) =>
+    [...token].map(romanizeHangulSyllable).join(""),
+  );
+}
+
+async function requestOpenAITranslation(input, extraInstruction = "") {
   const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey || !name) return "";
+  if (!apiKey || !input) return "";
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10000);
@@ -299,11 +334,11 @@ async function translateProductNameWithAI(name) {
           {
             role: "system",
             content:
-              "Translate Korean or English ecommerce product names into Simplified Chinese for a product profit spreadsheet. Do not leave any Korean Hangul characters in the final answer. Keep brand names, model names, shade numbers, capacity, quantities, English abbreviations, and digits. Translate product type words naturally, for example: '오 드 퍼퓸' = '淡香精', '앰플' = '安瓶', '세럼' = '精华'. If a Korean product line has an English-like name, romanize it or translate it, but never output Hangul. Example: '라스트 이모션 오 드 퍼퓸' -> 'Last Emotion 淡香精'. Output only one product name, no quotes and no explanation.",
+              `Translate Korean or English ecommerce product names into Simplified Chinese for a product profit spreadsheet. The final answer must not contain any Korean Hangul characters. Translate every Korean word. Keep brand names, model names, shade numbers, capacity, quantities, English abbreviations, and digits. If a product line is a proper noun, romanize it in Latin letters instead of leaving Hangul. Output only one product name, no quotes and no explanation.${extraInstruction ? ` ${extraInstruction}` : ""}`,
           },
           {
             role: "user",
-            content: String(name),
+            content: String(input),
           },
         ],
         temperature: 0.2,
@@ -312,7 +347,7 @@ async function translateProductNameWithAI(name) {
     });
     if (!response.ok) return "";
     const payload = await response.json();
-    return cleanText(openAITranslationText(payload)).replace(/^["'“”]+|["'“”]+$/g, "");
+    return cleanText(openAITranslationText(payload)).replace(/^["']+|["']+$/g, "");
   } catch {
     return "";
   } finally {
@@ -320,9 +355,32 @@ async function translateProductNameWithAI(name) {
   }
 }
 
+async function translateProductNameWithAI(name) {
+  const first = await requestOpenAITranslation(name);
+  if (first && !containsHangul(first)) return first;
+
+  const remaining = hangulTokens(first || name);
+  if (!first && !remaining.length) return "";
+
+  const retryInput = [
+    `Original product name: ${name}`,
+    first ? `Previous translation with untranslated Korean: ${first}` : "",
+    remaining.length ? `Korean tokens that must be translated or romanized: ${remaining.join(", ")}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+  const retry = await requestOpenAITranslation(
+    retryInput,
+    "This is a correction pass. Fix the previous output so there is zero Hangul left.",
+  );
+  if (retry && !containsHangul(retry)) return retry;
+  return retry || first || "";
+}
+
 async function translatedProductName(name) {
   const aiName = await translateProductNameWithAI(name);
-  return aiName ? translateProductName(aiName) : translateProductName(name);
+  const translated = aiName ? translateProductName(aiName) : translateProductName(name);
+  return containsHangul(translated) ? romanizeHangulText(translated) : translated;
 }
 
 function walkJson(value, callback) {
