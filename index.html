@@ -15,7 +15,7 @@
             <span class="title-sub">입점 상품 마진 시뮬레이션</span>
           </h1>
           <p class="intro-copy">
-            <span class="label-main">使用方法：粘贴官网链接并点击提取 → 确认品类、容量和售价 → 手动填写供货价、淘宝原价和淘宝最低价 → 查看利润、税金，最后保存记录或导出表格。</span>
+            <span class="label-main">使用方法：手动填写官网链接并点击提取 → 确认品类、容量和售价 → 手动填写供货价、淘宝原价和淘宝最低价 → 查看利润、税金，最后保存记录或导出表格。</span>
             <span class="label-sub">사용 방법: 공식몰 링크 입력 후 추출 → 카테고리, 용량, 판매가 확인 → 공급가, 타오바오 정가, 최저가 입력 → 마진과 세금을 확인하고 기록 저장 또는 표로 내보내기.</span>
           </p>
         </div>
@@ -82,7 +82,7 @@
             <thead>
               <tr>
                 <th></th>
-                <th><span class="label-main">官网链接</span><span class="label-sub">공식몰 링크</span></th>
+                <th class="manual-col"><span class="manual-badge">手填 / 직접</span><span class="label-main">官网链接</span><span class="label-sub">공식몰 링크</span></th>
                 <th><span class="label-main">提取</span><span class="label-sub">추출</span></th>
                 <th><span class="label-main">产品图</span><span class="label-sub">상품 이미지</span></th>
                 <th><span class="label-main">品类</span><span class="label-sub">카테고리</span></th>
@@ -121,7 +121,7 @@
     <template id="rowTemplate">
       <tr>
         <td><button class="icon-button" data-action="remove" type="button" aria-label="删除商品">×</button></td>
-        <td><input data-field="productUrl" aria-label="官网链接" type="url" placeholder="https://..." /></td>
+        <td class="manual-cell"><input data-field="productUrl" aria-label="官网链接" type="url" placeholder="https://..." /></td>
         <td>
           <button class="extract-button" data-action="extract" type="button">提取</button>
           <span class="extract-status" data-output="status"></span>
