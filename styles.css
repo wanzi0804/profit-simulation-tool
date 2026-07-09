@@ -651,7 +651,7 @@ td.manual-cell input:focus {
 }
 
 input[placeholder*="手动输入"],
-input[placeholder*="직접 입력"] {
+input[placeholder*="입력"] {
   background: #fff8e8;
   border-color: rgba(184, 116, 37, 0.6);
 }

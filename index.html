@@ -94,7 +94,7 @@
             <thead>
               <tr>
                 <th></th>
-                <th class="manual-col"><span class="manual-badge">手填 / 직접</span><span class="label-main">官网链接</span><span class="label-sub">공식몰 링크</span></th>
+                <th class="manual-col"><span class="manual-badge">手填 / 입력 필요</span><span class="label-main">官网链接</span><span class="label-sub">공식몰 링크</span></th>
                 <th><span class="label-main">提取</span><span class="label-sub">추출</span></th>
                 <th><span class="label-main">产品图</span><span class="label-sub">상품 이미지</span></th>
                 <th><span class="label-main">品类</span><span class="label-sub">카테고리</span></th>
@@ -103,11 +103,11 @@
                 <th><span class="label-main">韩文产品名</span><span class="label-sub">한국어 상품명</span></th>
                 <th><span class="label-main">韩国售价(KRW)</span><span class="label-sub">한국 판매가(KRW)</span></th>
                 <th><span class="label-main">韩国售价(CNY)</span><span class="label-sub">한국 판매가(CNY)</span></th>
-                <th class="manual-col"><span class="manual-badge">手填 / 직접</span><span class="label-main">供货价(KRW)</span><span class="label-sub">공급가(KRW)</span></th>
+                <th class="manual-col"><span class="manual-badge">手填 / 입력 필요</span><span class="label-main">供货价(KRW)</span><span class="label-sub">공급가(KRW)</span></th>
                 <th><span class="label-main">供货价(CNY)</span><span class="label-sub">공급가(CNY)</span></th>
                 <th><span class="label-main">供货率</span><span class="label-sub">공급률</span></th>
-                <th class="manual-col"><span class="manual-badge">手填 / 직접</span><span class="label-main">淘宝原价(CNY)</span><span class="label-sub">타오바오 정가(CNY)</span></th>
-                <th class="manual-col"><span class="manual-badge">手填 / 직접</span><span class="label-main">淘宝最低价(CNY)</span><span class="label-sub">타오바오 최저가(CNY)</span></th>
+                <th class="manual-col"><span class="manual-badge">手填 / 입력 필요</span><span class="label-main">淘宝原价(CNY)</span><span class="label-sub">타오바오 정가(CNY)</span></th>
+                <th class="manual-col"><span class="manual-badge">手填 / 입력 필요</span><span class="label-main">淘宝最低价(CNY)</span><span class="label-sub">타오바오 최저가(CNY)</span></th>
                 <th><span class="label-main">原价利润(CNY)</span><span class="label-sub">정가 마진(CNY)</span></th>
                 <th><span class="label-main">原价利润率</span><span class="label-sub">정가 마진율</span></th>
                 <th><span class="label-main">最低价利润(CNY)</span><span class="label-sub">최저가 마진(CNY)</span></th>
@@ -155,16 +155,16 @@
             <option value="other">其他 / 기타</option>
           </select>
         </td>
-        <td><input data-field="capacity" aria-label="容量" type="number" min="0" step="0.01" placeholder="自动提取 / 자동 추출" /></td>
-        <td><textarea data-field="chineseName" aria-label="中文产品名" rows="2" placeholder="自动翻译 / 자동 번역"></textarea></td>
-        <td><textarea data-field="name" aria-label="韩文产品名" rows="2" placeholder="自动提取 / 자동 추출"></textarea></td>
-        <td><input data-field="krwRetail" aria-label="韩国售价(KRW)" type="number" min="0" step="1" placeholder="自动提取 / 자동 추출" /></td>
+        <td><input data-field="capacity" aria-label="容量" type="number" min="0" step="0.01" placeholder="自动提取 / 자동" /></td>
+        <td><textarea data-field="chineseName" aria-label="中文产品名" rows="2" placeholder="自动翻译 / 자동"></textarea></td>
+        <td><textarea data-field="name" aria-label="韩文产品名" rows="2" placeholder="自动提取 / 자동"></textarea></td>
+        <td><input data-field="krwRetail" aria-label="韩国售价(KRW)" type="number" min="0" step="1" placeholder="自动提取 / 자동" /></td>
         <td data-output="cnyRetail">¥0.00</td>
-        <td class="manual-cell"><input data-field="krwSupply" aria-label="供货价(KRW)" type="number" min="0" step="1" placeholder="手动输入 / 직접 입력" /></td>
+        <td class="manual-cell"><input data-field="krwSupply" aria-label="供货价(KRW)" type="number" min="0" step="1" placeholder="手动输入 / 입력" /></td>
         <td data-output="cnySupply">¥0.00</td>
         <td data-output="supplyRate">0.0%</td>
-        <td class="manual-cell"><input data-field="taobaoPrice" aria-label="淘宝原价(CNY)" type="number" min="0" step="0.01" placeholder="手动输入 / 직접 입력" /></td>
-        <td class="manual-cell"><input data-field="taobaoLowPrice" aria-label="淘宝最低价(CNY)" type="number" min="0" step="0.01" placeholder="手动输入 / 직접 입력" /></td>
+        <td class="manual-cell"><input data-field="taobaoPrice" aria-label="淘宝原价(CNY)" type="number" min="0" step="0.01" placeholder="手动输入 / 입력" /></td>
+        <td class="manual-cell"><input data-field="taobaoLowPrice" aria-label="淘宝最低价(CNY)" type="number" min="0" step="0.01" placeholder="手动输入 / 입력" /></td>
         <td data-output="normalProfit">¥0.00</td>
         <td data-output="normalProfitRate">0.0%</td>
         <td data-output="discountProfit">¥0.00</td>
